@@ -34,6 +34,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
   @Value("${oauth.redirect-url}")
   private String redirectUrl;
 
+  @Value("${oauth.use-https}")
+  private boolean useHttps;
+
   private final GoogleAuthenticationService googleAuthenticationService;
 
   private final SessionService sessionService;
@@ -94,7 +97,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
   private String buildRedirectUri(ServerHttpRequest request) {
     String baseUrl = getBaseUrl(request);
-    log.info("Base URL: {}", baseUrl);
+    if (useHttps) {
+      baseUrl = baseUrl.replace("http://", "https://");
+    }
     return baseUrl + ENDPOINT_CALLBACK;
   }
 

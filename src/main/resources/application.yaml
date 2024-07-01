@@ -13,6 +13,7 @@ oauth:
     clientSecret: ${GOOGLE_OAUTH_CLIENT_SECRET}
     scope: "openid profile email"
   redirect-url: ${GOOGLE_OAUTH_REDIRECT_URL}
+  use-https: ${USE_HTTPS}
 
 spring:
 
