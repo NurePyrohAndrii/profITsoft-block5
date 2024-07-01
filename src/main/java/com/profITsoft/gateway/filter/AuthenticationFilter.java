@@ -94,6 +94,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
   private String buildRedirectUri(ServerHttpRequest request) {
     String baseUrl = getBaseUrl(request);
+    log.info("Base URL: {}", baseUrl);
     return baseUrl + ENDPOINT_CALLBACK;
   }
 
