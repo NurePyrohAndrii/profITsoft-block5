@@ -1,0 +1,81 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+cors:
+  allowed-origin: ${ALLOWED_ORIGIN}
+
+oauth:
+  google:
+    clientId: ${GOOGLE_OAUTH_CLIENT_ID}
+    clientSecret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+    scope: "openid profile email"
+  redirect-url: ${GOOGLE_OAUTH_REDIRECT_URL}
+
+spring:
+
+  application:
+    name: gateway
+
+  config:
+    import: optional:consul:/
+
+  data:
+    redis:
+      repositories:
+        enabled: true
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  cloud:
+    consul:
+      host: ${CONSUL_HOST}
+      port: ${CONSUL_PORT}
+      discovery:
+        health-check-path: /health
+        health-check-interval: 10s
+        health-check-tls-skip-verify: true
+        service-name: gateway
+        scheme: http
+#        scheme: https
+
+    gateway:
+      routes:
+        - id: gateway-oauth-route
+          uri: lb://gateway
+          predicates:
+            - Path=/oauth/**
+
+        - id: service-flight-status-route
+          uri: lb://service-flight-status
+          predicates:
+            - Path=/api/flight-statuses/**
+
+        - id: service-flight-system-route
+          uri: lb://service-flight-system
+          predicates:
+            - Path=/api/**
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      services:
+        wait-duration-in-open-state: 10s
+        failure-rate-threshold: 60
+        slow-call-duration-threshold:
+          - 2s
+        minimum-number-of-calls: 3
+        permitted-number-of-calls-in-half-open-state: 1
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+
